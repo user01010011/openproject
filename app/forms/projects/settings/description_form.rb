@@ -27,22 +27,16 @@
 #
 # See COPYRIGHT and LICENSE files for more details.
 #++
-
-class Projects::Settings::GeneralController < Projects::SettingsController
-  menu_item :settings_general
-
-  def update
-    service_call = Projects::UpdateService
-                     .new(user: current_user, model: @project)
-                     .call(permitted_params.project)
-
-    @project = service_call.result
-
-    if service_call.success?
-      flash[:notice] = I18n.t(:notice_successful_update)
-      redirect_to project_settings_general_path(@project)
-    else
-      render action: "show", status: :unprocessable_entity
+module Projects
+  module Settings
+    class DescriptionForm < ApplicationForm
+      form do |f|
+        f.rich_text_area(
+          name: :description,
+          label: attribute_name(:description),
+          rich_text_options: { showAttachments: false }
+        )
+      end
     end
   end
 end

@@ -28,4 +28,6 @@ See COPYRIGHT and LICENSE files for more details.
 ++#%>
 <%= render Projects::Settings::IndexPageHeaderComponent.new(project: @project) %>
 
-<%= angular_component_tag "opce-project-settings" %>
+<%= render Projects::Settings::General::IndexComponent.new(project: @project) %>
+
+<%# angular_component_tag "opce-project-settings" %>

@@ -252,7 +252,7 @@ Rails.application.routes.draw do
   resources :projects, except: %i[show edit create update] do
     scope module: "projects" do
       namespace "settings" do
-        resource :general, only: %i[show], controller: "general"
+        resource :general, only: %i[show update], controller: "general"
         resource :modules, only: %i[show update]
         resource :project_custom_fields, only: %i[show] do
           member do

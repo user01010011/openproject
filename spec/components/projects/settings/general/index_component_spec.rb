@@ -28,21 +28,17 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 
-class Projects::Settings::GeneralController < Projects::SettingsController
-  menu_item :settings_general
+require "rails_helper"
 
-  def update
-    service_call = Projects::UpdateService
-                     .new(user: current_user, model: @project)
-                     .call(permitted_params.project)
+RSpec.describe Projects::Settings::General::IndexComponent, type: :component do
+  let(:project) { build_stubbed(:project) }
 
-    @project = service_call.result
+  def render_component(**params)
+    render_inline(described_class.new(project:, **params))
+    page
+  end
 
-    if service_call.success?
-      flash[:notice] = I18n.t(:notice_successful_update)
-      redirect_to project_settings_general_path(@project)
-    else
-      render action: "show", status: :unprocessable_entity
-    end
+  it "renders 4 forms" do
+    expect(render_component).to have_css "form", count: 4
   end
 end

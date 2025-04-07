@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-#-- copyright
+# -- copyright
 # OpenProject is an open source project management software.
-# Copyright (C) the OpenProject GmbH
+# Copyright (C) 2010-2024 the OpenProject GmbH
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 3.
@@ -26,23 +26,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 # See COPYRIGHT and LICENSE files for more details.
-#++
+# ++
 
-class Projects::Settings::GeneralController < Projects::SettingsController
-  menu_item :settings_general
+module Projects
+  module Settings
+    module General
+      class IndexComponent < ApplicationComponent
+        include ApplicationHelper
+        include OpPrimer::ComponentHelpers
+        include OpTurbo::Streamable
 
-  def update
-    service_call = Projects::UpdateService
-                     .new(user: current_user, model: @project)
-                     .call(permitted_params.project)
-
-    @project = service_call.result
-
-    if service_call.success?
-      flash[:notice] = I18n.t(:notice_successful_update)
-      redirect_to project_settings_general_path(@project)
-    else
-      render action: "show", status: :unprocessable_entity
+        options :project
+      end
     end
   end
 end

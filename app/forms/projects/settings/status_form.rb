@@ -27,22 +27,40 @@
 #
 # See COPYRIGHT and LICENSE files for more details.
 #++
+module Projects
+  module Settings
+    class StatusForm < ApplicationForm
+      include ProjectStatusHelper
 
-class Projects::Settings::GeneralController < Projects::SettingsController
-  menu_item :settings_general
+      form do |f|
+        f.autocompleter(
+          name: :status_code,
+          label: attribute_name(:status_code),
+          include_blank: false,
+          autocomplete_options: {
+            multiple: false,
+            decorated: true,
+            clearable: false,
+            focusDirectly: false,
+            data: {
+              "qa-field-name": "status_code"
+            }
+          }
+        ) do |select|
+          Project.status_codes.keys.map do |status_code|
+            select.option(label: project_status_name(status_code),
+                          value: status_code,
+                          classes: "project-status--name #{project_status_css_class(status_code)}",
+                          selected: model.status_code == status_code)
+          end
+        end
 
-  def update
-    service_call = Projects::UpdateService
-                     .new(user: current_user, model: @project)
-                     .call(permitted_params.project)
-
-    @project = service_call.result
-
-    if service_call.success?
-      flash[:notice] = I18n.t(:notice_successful_update)
-      redirect_to project_settings_general_path(@project)
-    else
-      render action: "show", status: :unprocessable_entity
+        f.rich_text_area(
+          name: :status_explanation,
+          label: attribute_name(:status_explanation),
+          rich_text_options: { showAttachments: false }
+        )
+      end
     end
   end
 end

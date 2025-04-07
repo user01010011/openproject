@@ -27,22 +27,19 @@
 #
 # See COPYRIGHT and LICENSE files for more details.
 #++
+module Projects
+  module Settings
+    class Submit < ApplicationForm
+      attr_reader :label
 
-class Projects::Settings::GeneralController < Projects::SettingsController
-  menu_item :settings_general
+      form do |f|
+        f.submit name: :submit, label:
+      end
 
-  def update
-    service_call = Projects::UpdateService
-                     .new(user: current_user, model: @project)
-                     .call(permitted_params.project)
-
-    @project = service_call.result
-
-    if service_call.success?
-      flash[:notice] = I18n.t(:notice_successful_update)
-      redirect_to project_settings_general_path(@project)
-    else
-      render action: "show", status: :unprocessable_entity
+      def initialize(label: I18n.t("button_save"))
+        super()
+        @label = label
+      end
     end
   end
 end
