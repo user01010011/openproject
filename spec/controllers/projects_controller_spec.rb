@@ -61,6 +61,44 @@ RSpec.describe ProjectsController do
     end
   end
 
+  describe "#create" do
+    before do
+      creation_service = instance_double(Projects::CreateService,
+                                         call: service_result)
+
+      allow(Projects::CreateService)
+        .to receive(:new)
+              .with(user: admin)
+              .and_return(creation_service)
+    end
+
+    context "when service call succeeds" do
+      let(:project) { build_stubbed(:project) }
+      let(:service_result) { ServiceResult.success(result: project) }
+
+      it "redirects to project overview show" do
+        post :create, params: { project: { name: "New Project" } }
+
+        expect(response).to redirect_to project_overview_path(project)
+        expect(flash[:notice]).to be_present
+      end
+    end
+
+    context "when service call fails" do
+      let(:project) { Project.new }
+      let(:service_result) { ServiceResult.failure(result: project) }
+
+      it "renders new template with errors" do
+        post :create, params: { project: { name: "" } }
+
+        expect(response).not_to be_successful
+        expect(response).to have_http_status :unprocessable_entity
+        expect(assigns(:project)).to be_invalid
+        expect(response).to render_template "new"
+      end
+    end
+  end
+
   describe "index.html" do
     shared_let(:project_a) { create(:project, name: "Project A", public: false, active: true) }
     shared_let(:project_b) { create(:project, name: "Project B", public: false, active: true) }

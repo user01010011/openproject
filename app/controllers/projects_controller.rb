@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #-- copyright
 # OpenProject is an open source project management software.
 # Copyright (C) the OpenProject GmbH
@@ -32,10 +34,10 @@ class ProjectsController < ApplicationController
   menu_item :overview
   menu_item :roadmap, only: :roadmap
 
-  before_action :find_project, except: %i[index new export_list_modal]
+  before_action :find_project, except: %i[index new create export_list_modal]
   before_action :load_query_or_deny_access, only: %i[index export_list_modal]
   before_action :authorize, only: %i[copy deactivate_work_package_attachments]
-  before_action :authorize_global, only: %i[new]
+  before_action :authorize_global, only: %i[new create]
   before_action :require_admin, only: %i[destroy destroy_info]
 
   no_authorization_required! :index, :export_list_modal
@@ -89,7 +91,57 @@ class ProjectsController < ApplicationController
   end
 
   def new
-    render layout: "no_menu"
+    if params[:template_id]
+      @template = Project.find(params[:template_id])
+      # copied_project = @template.dup
+      # copied_project.parent = @template.parent
+      skipped_attributes = %w[id created_at updated_at name identifier active templated lft rgt]
+      new_attributes = @template.attributes.dup.except(*skipped_attributes).with_indifferent_access
+
+      @project = Project.new(new_attributes)
+      @project.project_custom_field_ids = @template.project_custom_field_ids
+
+      # copy_service = ::Projects::CopyService.new(source: @template, user: current_user)
+      # target_project_params = {}
+      # result = copy_service.call(target_project_params:, attributes_only: true)
+      # if result.success?
+      #   @project = result.result
+      # end
+    else
+      @project = if params[:parent_id]
+                   Project.find(params[:parent_id]).children.build
+                 else
+                   Project.new
+                 end
+    end
+
+    respond_to do |format|
+      format.html do
+        render layout: "no_menu"
+      end
+
+      format.turbo_stream do
+        current_url = url_for(params.permit(:parent_id, :template_id))
+        turbo_streams << turbo_stream.push_state(current_url)
+        turbo_streams << turbo_stream.replace("new_project_form", partial: "projects/form", refresh: :morph)
+        render turbo_stream: turbo_streams
+      end
+    end
+  end
+
+  def create
+    service_call = Projects::CreateService
+      .new(user: current_user)
+      .call(permitted_params.project)
+
+    @project = service_call.result
+
+    if service_call.success?
+      flash[:notice] = I18n.t(:notice_successful_create)
+      redirect_to project_overview_path(@project)
+    else
+      render action: :new, status: :unprocessable_entity
+    end
   end
 
   def copy

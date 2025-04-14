@@ -26,16 +26,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 See COPYRIGHT and LICENSE files for more details.
 
 ++#%>
-<% html_title t("label_project_new") %>
-<%=
-  render(Primer::OpenProject::PageHeader.new) do |header|
-    header.with_title { t(:label_project_new) }
-    header.with_breadcrumbs([{ href: home_path, text: organization_name }, t(:label_project_new)])
-  end
-%>
 
-<% content_controller "projects-form", dynamic: true %>
+<div class="op-highlighted-input" data-projects-form-target="templateSelectContainer">
+  <%=
+    primer_form_with(action: :new, data: { turbo: false }) do |f|
+      render Projects::TemplateAutocompleter.new(f)
+    end
+  %>
+</div>
 
-<%= render Projects::NewComponent.new(project: @project) %>
+<%= primer_form_with(model: project, id: "new_project_form", data: { turbo: false }) do |f| %>
+  <%= 
+    render(
+      Primer::Forms::FormList.new(
+        Projects::Settings::NameForm.new(f),
+        Projects::Settings::RelationsForm.new(f),
+        Projects::CustomFields::Form.new(f, project:, wrapper_id: "FOO")
+      )
+    )
+  %>
 
-<%# angular_component_tag "opce-new-project" %>
+  <% if @template %>
+    <%= render(Primer::Beta::Heading.new(tag: :h3)) { I18n.t('js.project.copy.copy_options') } %>
+    <%= render(Projects::CopyOptions.new(f)) %>
+  <% end %>
+
+  <%= f.submit "Save" %>
+
+<% end %>

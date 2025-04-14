@@ -56,8 +56,8 @@ RSpec.describe "Projects", "creation",
   it "can create a project" do
     projects_page.navigate_to_new_project_page_from_toolbar_items
 
-    name_field.set_value "Foo bar"
-    click_button "Save"
+    fill_in "Name", with: "Foo bar"
+    click_on "Save"
 
     expect(page).to have_current_path /\/projects\/foo-bar\/?/
     expect(page).to have_content "Foo bar"
@@ -66,7 +66,7 @@ RSpec.describe "Projects", "creation",
   it "does not create a project with an already existing identifier" do
     projects_page.navigate_to_new_project_page_from_toolbar_items
 
-    name_field.set_value "Foo project"
+    fill_in "Name", with: "Foo project"
     click_on "Save"
 
     expect(page).to have_current_path /\/projects\/foo-project-1\/?/
