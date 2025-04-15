@@ -27,33 +27,32 @@
 #
 # See COPYRIGHT and LICENSE files for more details.
 #++
-
 module Projects
-  class TemplateAutocompleter < ApplicationForm
-    form do |f|
-      f.project_autocompleter(
-        # scope_name_to_model: false,
-        name: "template_id",
-        # value: "foo",
-        label: I18n.t("js.project.use_template"),
-        autocomplete_options: {
-          focusDirectly: false,
-          dropdownPosition: "bottom",
-          # decorated: true,
-          # inputName: "FOOBAR",
-          # inputValue: "FOOBAR2_value",
-          # labelForId: "FOOBAR2",
-          filters: [
-            { name: "user_action", operator: "=", values: ["projects/copy"] },
-            { name: "templated", operator: "=", values: ["t"] }
-          ],
-          data: {
-            "projects-form-target": "templateSelect",
-            action: "change->highlight-when-value-selected#itemSelected change->projects-form#templateSelected",
-            "qa-field-name": "use_template"
-          }
-        }
-      )
+  module Settings
+    class CustomFieldsForm < ApplicationForm
+      include ::CustomFields::CustomFieldRendering
+
+      form do |f|
+        render_custom_fields(form: f)
+      end
+
+      def initialize(project:)
+        super()
+        @project = project
+      end
+
+      # override since we want to add the model with @project
+      def additional_custom_field_input_arguments
+        { model: @project, wrapper_id: nil }
+      end
+
+      private
+
+      def custom_fields
+        @project
+          .available_custom_fields
+          .required
+      end
     end
   end
 end

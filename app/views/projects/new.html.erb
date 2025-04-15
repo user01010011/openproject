@@ -36,6 +36,21 @@ See COPYRIGHT and LICENSE files for more details.
 
 <% content_controller "projects-form", dynamic: true %>
 
-<%= render Projects::NewComponent.new(project: @project) %>
+<%=
+  admin_settings_primer_form_with(action: :new, data: { turbo: false }) do |f|
+    render(
+      Primer::Box.new(
+        border: true, border_radius: 2, bg: :inset, my: 3, p: 3, pb: 4,
+        data: {
+          controller: "highlight-when-value-selected",
+          highlight_when_value_selected_highlight_class: Primer::Classify.(bg: :accent)[:class],
+          highlight_when_value_selected_target: "content"
+        }
+      )
+    ) do
+      render Projects::TemplateAutocompleter.new(f)
+    end
+  end
+%>
 
-<%# angular_component_tag "opce-new-project" %>
+<%= render Projects::NewComponent.new(project: @project, template: @template) %>

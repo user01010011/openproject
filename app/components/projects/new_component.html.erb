@@ -27,30 +27,24 @@ See COPYRIGHT and LICENSE files for more details.
 
 ++#%>
 
-<div class="op-highlighted-input" data-projects-form-target="templateSelectContainer">
-  <%=
-    primer_form_with(action: :new, data: { turbo: false }) do |f|
-      render Projects::TemplateAutocompleter.new(f)
-    end
-  %>
-</div>
-
-<%= primer_form_with(model: project, id: "new_project_form", data: { turbo: false }) do |f| %>
-  <%= 
-    render(
-      Primer::Forms::FormList.new(
-        Projects::Settings::NameForm.new(f),
-        Projects::Settings::RelationsForm.new(f),
-        Projects::CustomFields::Form.new(f, project:, wrapper_id: "FOO")
+<%= component_wrapper do %>
+  <%= admin_settings_primer_form_with(model: project, id: "new_project_form", data: { turbo: false }) do |f| %>
+    <%=
+      render(
+        Primer::Forms::FormList.new(
+          Projects::Settings::NameForm.new(f),
+          Projects::Settings::RelationsForm.new(f),
+          Projects::Settings::CustomFieldsForm.new(f, project:)
+        )
       )
-    )
-  %>
-
-  <% if @template %>
-    <%= render(Primer::Beta::Heading.new(tag: :h3)) { I18n.t('js.project.copy.copy_options') } %>
-    <%= render(Projects::CopyOptions.new(f)) %>
+    %>
+    <%=
+      if template
+        render(Primer::Box.new(border: true, border_radius: 2, bg: :inset, my: 3, p: 3)) do
+          render(Projects::CopyOptions.new(f))
+        end
+      end
+    %>
+    <%= render Projects::Settings::Submit.new(f, label: I18n.t("button_create")) %>
   <% end %>
-
-  <%= f.submit "Save" %>
-
 <% end %>

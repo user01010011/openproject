@@ -59,8 +59,6 @@ export default class ProjectsFormController extends Controller {
   }
 
   templateSelected({ detail:template }:CustomEvent<IProjectAutocompleteItem | null>): void {
-    this.templateSelectContainerTarget.classList.toggle('op-highlighted-input_active', !!template);
-
     console.log("template item", template?.id, template?.name);
 
     const urlSearchParams = new URLSearchParams(window.location.search);

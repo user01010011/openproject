@@ -28,32 +28,17 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 
-module Projects
-  class TemplateAutocompleter < ApplicationForm
-    form do |f|
-      f.project_autocompleter(
-        # scope_name_to_model: false,
-        name: "template_id",
-        # value: "foo",
-        label: I18n.t("js.project.use_template"),
-        autocomplete_options: {
-          focusDirectly: false,
-          dropdownPosition: "bottom",
-          # decorated: true,
-          # inputName: "FOOBAR",
-          # inputValue: "FOOBAR2_value",
-          # labelForId: "FOOBAR2",
-          filters: [
-            { name: "user_action", operator: "=", values: ["projects/copy"] },
-            { name: "templated", operator: "=", values: ["t"] }
-          ],
-          data: {
-            "projects-form-target": "templateSelect",
-            action: "change->highlight-when-value-selected#itemSelected change->projects-form#templateSelected",
-            "qa-field-name": "use_template"
-          }
-        }
-      )
-    end
+require "rails_helper"
+
+RSpec.describe Projects::NewComponent, type: :component do
+  let(:project) { build_stubbed(:project) }
+
+  def render_component(**params)
+    render_inline(described_class.new(project:, **params))
+    page
+  end
+
+  it "renders a form" do
+    expect(render_component).to have_css "form"
   end
 end

@@ -121,9 +121,11 @@ class ProjectsController < ApplicationController
       end
 
       format.turbo_stream do
+        replace_via_turbo_stream(
+          component: Projects::NewComponent.new(project: @project, template: @template)
+        )
         current_url = url_for(params.permit(:parent_id, :template_id))
         turbo_streams << turbo_stream.push_state(current_url)
-        turbo_streams << turbo_stream.replace("new_project_form", partial: "projects/form", refresh: :morph)
         render turbo_stream: turbo_streams
       end
     end

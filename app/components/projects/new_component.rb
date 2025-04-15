@@ -34,6 +34,6 @@ module Projects
     include OpPrimer::ComponentHelpers
     include OpTurbo::Streamable
 
-    options :project
+    options :project, :template
   end
 end

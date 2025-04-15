@@ -31,7 +31,7 @@
 module Projects
   class CopyOptions < ApplicationForm
     form do |f|
-      f.check_box_group(name: "copy_options") do |group|
+      f.check_box_group(name: "copy_options", label: I18n.t("js.project.copy.copy_options")) do |group|
         CopyService.copyable_dependencies.each do |dep|
           group.check_box label: dep[:name_source].call, value: dep[:identifier]
         end
